@@ -153,7 +153,30 @@ secretos sueltos.
 
 ---
 
-## 8. Pendientes
+## 8. Extensión de VS Code
+
+**No hay extensión oficial.** Existen varias comunitarias en el marketplace, de
+mantenimiento irregular, y no merece la pena depender de ellas para un control de
+seguridad.
+
+| | |
+|---|---|
+| Sitio | https://github.com/gitleaks/gitleaks |
+| Instalación en Windows | `winget install gitleaks` o `scoop install gitleaks` |
+
+Las dos vías que sí funcionan están en la sección 5: el **hook de pre-commit**
+—que da el aviso antes de que el secreto entre en la historia, sin depender de
+ninguna extensión— y el **job de CI**, que es el que no se puede saltar.
+
+Como suplemento dentro del editor, la extensión de **Trivy** incluye detección de
+secretos con reglas parecidas y sí es oficial. No sustituye a Gitleaks —no
+recorre el historial de git, que es la parte que importa— pero cubre el caso de
+escribir una clave y verla marcada al momento. Ver
+[docker-y-npm.md](./docker-y-npm.md) §8.
+
+---
+
+## 9. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

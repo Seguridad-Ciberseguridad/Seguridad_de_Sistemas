@@ -184,7 +184,74 @@ Cuatro cosas que se comprueban de una pasada:
 
 ---
 
-## 8. Pendientes
+## 8. Extensiones de VS Code
+
+Tres, y son las que cubren el frente de esta ficha dentro del editor.
+
+### Aqua Trivy
+
+| | |
+|---|---|
+| ID | `AquaSecurityOfficial.trivy-vulnerability-scanner` |
+| Marketplace | https://marketplace.visualstudio.com/items?itemName=AquaSecurityOfficial.trivy-vulnerability-scanner |
+| Sitio | https://trivy.dev · https://github.com/aquasecurity/trivy |
+
+Escanea desde el explorador de la barra lateral: dependencias del
+`package-lock.json`, imágenes Docker, malas configuraciones del `Dockerfile` y
+secretos.
+
+> **El paso "Connect to Aqua Platform" del walkthrough es opcional — sáltalo.**
+> Aqua Security es la empresa detrás de Trivy; el escáner es libre y completo por
+> sí solo, y la plataforma es su SaaS de pago para agregar resultados de varios
+> equipos. Sin conectar hace el 100% de lo que se describe aquí.
+
+### Snyk Security
+
+| | |
+|---|---|
+| ID | `snyk-security.snyk-vulnerability-scanner` |
+| Marketplace | https://marketplace.visualstudio.com/items?itemName=snyk-security.snyk-vulnerability-scanner |
+| Sitio | https://snyk.io |
+
+Cubre el hueco de SCA en el editor: marca las dependencias vulnerables al abrir
+el `package.json`, sin esperar al CI. Requiere cuenta —el plan gratuito basta— y
+por tanto conecta con su servicio.
+
+Ofrece activar el **escaneo automático de código generado por IA**. Tiene sentido
+aceptarlo si trabajas con un agente en el IDE: sube la frecuencia de análisis,
+que es justo lo que hace falta cuando el código llega en bloques grandes y se
+revisa menos.
+
+> **Consideración de datos:** el análisis de Snyk **no es local**. El código y el
+> manifiesto de dependencias se envían a sus servidores. Para este proyecto es
+> aceptable —el código fuente no contiene datos de ciudadanos— pero conviene que
+> sea una decisión escrita y no el resultado de un diálogo emergente. Si aparece
+> un requisito de que el código no salga de infraestructura propia, Snyk queda
+> fuera y Trivy se queda, porque Trivy corre en local.
+
+### Container Tools
+
+| | |
+|---|---|
+| ID | `ms-azuretools.vscode-docker` |
+| Marketplace | https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker |
+| Sitio | https://www.docker.com |
+
+Resaltado y linter del `Dockerfile`, y gestión de imágenes y contenedores. Marca
+varias de las cosas de la sección 7 —usuario root, etiquetas sin fijar— mientras
+escribes.
+
+### Aviso sobre la raíz del workspace
+
+Ninguna de las tres encuentra nada si VS Code está abierto en la carpeta de
+documentación: ahí no hay `package.json` ni `Dockerfile`. Hay que abrir el
+workspace en **`Modulo_Policial`**. Un informe limpio con la carpeta equivocada
+abierta no significa que no haya vulnerabilidades — significa que no ha mirado
+nada.
+
+---
+
+## 9. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

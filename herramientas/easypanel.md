@@ -131,7 +131,29 @@ restaurado no se sabe si es un backup.
 
 ---
 
-## 7. Pendientes
+## 7. Extensión de VS Code
+
+**No hay.** EasyPanel es un panel web y se administra desde el navegador.
+
+| | |
+|---|---|
+| Sitio | https://easypanel.io |
+| Documentación | https://easypanel.io/docs |
+
+Lo que sí sirve es alcanzar el VPS desde el editor:
+
+| Extensión | ID |
+|---|---|
+| Remote - SSH | `ms-vscode-remote.remote-ssh` |
+
+https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh
+
+Es además la vía correcta para administrar Postgres una vez cerrado el puerto
+público: túnel SSH en lugar de un puerto abierto, como dice la sección 3.
+
+---
+
+## 8. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

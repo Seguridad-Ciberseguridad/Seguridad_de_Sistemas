@@ -192,7 +192,31 @@ Lo que hay que verificar, en este orden:
 
 ---
 
-## 7. Pendientes
+## 7. Extensión de VS Code
+
+| | |
+|---|---|
+| Extensión | **GitHub Actions** |
+| ID | `github.vscode-github-actions` |
+| Marketplace | https://marketplace.visualstudio.com/items?itemName=github.vscode-github-actions |
+| Sitio | https://docs.github.com/actions |
+
+Oficial de GitHub. Dos cosas útiles:
+
+- **Validación del YAML mientras escribes.** Los workflows fallan a menudo por
+  indentación o por un nombre de clave mal puesto, y descubrirlo en el editor
+  ahorra el ciclo de commit → push → esperar → leer el error.
+- **Las ejecuciones en la barra lateral**, con logs por paso, sin abrir el
+  navegador.
+
+Se autentica con la sesión de GitHub que VS Code ya tiene; no hace falta token.
+
+Es especialmente oportuna ahora: vas a escribir el workflow de CI de la sección 4
+desde cero, y es justo el momento en que más se nota.
+
+---
+
+## 8. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

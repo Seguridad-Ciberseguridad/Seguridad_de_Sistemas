@@ -126,7 +126,37 @@ primer día— el equipo desactiva el paso en una semana.
 
 ---
 
-## 7. Pendientes
+## 7. Extensión de VS Code
+
+| | |
+|---|---|
+| Extensión | **Spectral** |
+| ID | `stoplight.spectral` |
+| Marketplace | https://marketplace.visualstudio.com/items?itemName=stoplight.spectral |
+| Sitio | https://stoplight.io/open-source/spectral |
+| Documentación | https://docs.stoplight.io/docs/spectral |
+
+Marca las violaciones directamente sobre el `openapi.json` mientras lo tienes
+abierto. No hay cuenta ni token: se "conecta" a un ruleset local.
+
+```json
+// .vscode/settings.json
+"spectral.rulesetFile": ".spectral.yaml",
+"spectral.validateFiles": ["**/openapi.json", "**/openapi.yaml"]
+```
+
+Sin `.spectral.yaml` la extensión aplica solo las reglas base de OpenAPI y no las
+de seguridad — es decir, no hace lo que te interesa. Instálala **después** de
+tener el ruleset y el documento generado, o parecerá que no funciona.
+
+**Alternativa complementaria:** `42Crunch.vscode-openapi`
+(https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi)
+audita el OpenAPI con una puntuación de seguridad y una vista más visual. Se
+solapa con Spectral; conviene una de las dos, no las dos marcando lo mismo.
+
+---
+
+## 8. Pendientes
 
 | | Estado |
 |---|---|

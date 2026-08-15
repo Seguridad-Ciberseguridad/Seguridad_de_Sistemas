@@ -132,7 +132,49 @@ que los 22 tests. Es una línea del workflow de
 
 ---
 
-## 7. Pendientes
+## 7. Extensiones instaladas y por instalar
+
+Esta ficha es el sitio natural para la lista completa, porque todas comparten un
+condicionante: **la configuración vive en `Modulo_Policial/.vscode/settings.json`**,
+la raíz del workspace, por lo dicho en la sección 2.
+
+| Extensión | ID | Estado |
+|---|---|---|
+| ESLint | `dbaeumer.vscode-eslint` | **En uso** — es el formateador |
+| SonarQube for IDE | `SonarSource.sonarlint-vscode` | Recomendada — [ficha](./sonarqube-cloud.md) §8 |
+| Prisma | `Prisma.prisma` | Recomendada — [ficha](./prisma.md) §7 |
+| GitHub Actions | `github.vscode-github-actions` | Recomendada — [ficha](./github-actions.md) §7 |
+| Snyk Security | `snyk-security.snyk-vulnerability-scanner` | Instalada — [ficha](./docker-y-npm.md) §8 |
+| Aqua Trivy | `AquaSecurityOfficial.trivy-vulnerability-scanner` | Instalada — [ficha](./docker-y-npm.md) §8 |
+| Container Tools | `ms-azuretools.vscode-docker` | Útil |
+| Spectral | `stoplight.spectral` | Después del `.spectral.yaml` — [ficha](./spectral.md) §7 |
+
+URL de cualquiera: `https://marketplace.visualstudio.com/items?itemName=<ID>`
+
+| | |
+|---|---|
+| ESLint | https://eslint.org |
+| Extensión ESLint | https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint |
+
+### Las dos que conectan a un servicio
+
+- **SonarQube for IDE** → organización `paredes-work` en SonarQube Cloud, con
+  *User Token*. Es la que más aporta: alinea editor y pipeline.
+- **Snyk** → cuenta propia, y **envía código a sus servidores**. Ver la
+  consideración de datos en [docker-y-npm.md](./docker-y-npm.md) §8.
+
+El resto trabajan en local. Trivy tiene un paso "Connect to Aqua Platform" en su
+walkthrough que es **opcional y se salta**.
+
+### Reglas de seguridad en ESLint
+
+Lo de la sección 5 no necesita extensión aparte: `eslint-plugin-security` y
+`eslint-plugin-no-secrets` se instalan como paquetes y la extensión de ESLint que
+ya tienes los muestra en el editor automáticamente.
+
+---
+
+## 8. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

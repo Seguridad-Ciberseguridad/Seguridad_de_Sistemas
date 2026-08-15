@@ -137,7 +137,35 @@ escáneres no pueden ver por diseño.
 
 ---
 
-## 8. Pendientes
+## 8. Extensión de VS Code
+
+**No hay.** Burp es una aplicación de escritorio en Java y todo el trabajo ocurre
+en su interfaz — que es el punto: el flujo de la sección 4 consiste en mirar
+peticiones y reenviarlas a mano, y eso no cabe en un editor.
+
+| | |
+|---|---|
+| Sitio | https://portswigger.net/burp |
+| Descarga Community | https://portswigger.net/burp/communitydownload |
+| Documentación | https://portswigger.net/burp/documentation |
+| Formación gratuita | https://portswigger.net/web-security |
+
+La última fila merece atención aparte: la **Web Security Academy** de PortSwigger
+es gratuita, tiene laboratorios prácticos con vulnerabilidades reales que se
+explotan con Burp, y cubre BOLA y control de acceso con más profundidad que
+cualquier documentación de herramienta. Para una asignatura de Seguridad de
+Sistemas es material de primera y no cuesta nada.
+
+**Complemento dentro del editor:** para lanzar peticiones sueltas sin salir de
+VS Code está `humao.rest-client`
+(https://marketplace.visualstudio.com/items?itemName=humao.rest-client), que
+ejecuta peticiones desde un fichero `.http`. No sustituye a Burp —no intercepta
+tráfico ni tiene Repeater— pero para repetir una llamada cambiando el token es
+suficiente, y los ficheros `.http` se pueden commitear como casos de prueba.
+
+---
+
+## 9. Pendientes
 
 | | Estado |
 |---|---|

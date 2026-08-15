@@ -147,7 +147,24 @@ GitHub, donde está la versión vigente.
 
 ---
 
-## 8. Pendientes
+## 8. Dónde está
+
+Es un documento, no una herramienta: no hay extensión.
+
+| | |
+|---|---|
+| Repositorio oficial | https://github.com/OWASP/ASVS |
+| Página del proyecto | https://owasp.org/www-project-application-security-verification-standard/ |
+| Hojas de verificación | Carpeta del repositorio, en `.csv` y `.xlsx` por idioma y versión |
+
+Hay traducción al castellano de algunas versiones, aunque suele ir por detrás de
+la inglesa. Para trabajar, la hoja de cálculo del repositorio es el formato
+práctico: una fila por requisito, columnas para nivel, y espacio para añadir
+las tuyas de estado y evidencia.
+
+---
+
+## 9. Pendientes
 
 | | Estado |
 |---|---|

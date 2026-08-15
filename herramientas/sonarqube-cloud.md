@@ -169,15 +169,40 @@ revisados; a partir de ahí solo aparecen los nuevos.
 
 ---
 
-## 8. SonarQube for IDE
+## 8. SonarQube for IDE — extensión de VS Code
 
-Extensión de VS Code, distinta del análisis en CI. En *Connected Mode* sincroniza
-las reglas del servidor con el editor, con lo que el hallazgo aparece al escribir
-en vez de tres minutos después en el pipeline. Requiere el mismo tipo de *User
-Token*. Sin conectar también funciona, con las reglas por defecto.
+| | |
+|---|---|
+| Extensión | **SonarQube for IDE** (antes SonarLint) |
+| ID | `SonarSource.sonarlint-vscode` |
+| Marketplace | https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarlint-vscode |
+| Sitio | https://www.sonarsource.com/products/sonarlint/ |
+| Servidor | https://sonarcloud.io |
+
+Distinta del análisis en CI. En *Connected Mode* sincroniza las reglas y el
+Quality Profile del servidor con el editor, con lo que el hallazgo aparece al
+escribir en vez de tres minutos después en el pipeline. Sin conectar también
+funciona, con las reglas por defecto.
 
 Es la diferencia entre corregir mientras se tiene el problema en la cabeza y
 corregir después de un cambio de contexto. Vale la instalación.
+
+### Conectar
+
+```
+Ctrl+Shift+P → SonarQube: Add SonarQube Cloud Connection
+   Organización   paredes-work
+   Token          User Token          ← el mismo tipo que en CI
+
+Ctrl+Shift+P → SonarQube: Bind to SonarQube Project
+```
+
+Dos avisos:
+
+- **Tiene que ser *User Token***. Es la trampa nº2 de la sección 4, y aquí se
+  manifiesta igual: la conexión se guarda y el binding falla después.
+- **El binding es por proyecto.** El workspace se abre en la carpeta padre
+  `Modulo_Policial`, así que hay que enlazar las tres subcarpetas por separado.
 
 ---
 

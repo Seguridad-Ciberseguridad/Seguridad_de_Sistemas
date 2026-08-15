@@ -151,7 +151,31 @@ consumo de cuota.
 
 ---
 
-## 7. Pendientes
+## 7. Extensión de VS Code
+
+| | |
+|---|---|
+| Extensión | **Prisma** |
+| ID | `Prisma.prisma` |
+| Marketplace | https://marketplace.visualstudio.com/items?itemName=Prisma.prisma |
+| Sitio | https://www.prisma.io |
+
+Oficial. Resaltado y formateo de `schema.prisma`, autocompletado de modelos y
+campos, y saltar a la definición desde el cliente. Funciona en local, sin cuenta
+ni conexión.
+
+**Lo que aporta a lo de esta ficha:** el autocompletado tipado hace que escribir
+`findMany({ where: { ... } })` sea más cómodo que escribir SQL a mano, y el
+camino cómodo es el seguro. La mayoría de los `$queryRawUnsafe` aparecen porque
+alguien no encontró cómo expresar algo con la API; con el editor ayudando, esa
+excusa desaparece casi siempre.
+
+No detecta el uso de los métodos `Unsafe` — para eso está la regla de ESLint de
+la sección 4.
+
+---
+
+## 8. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

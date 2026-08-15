@@ -131,7 +131,25 @@ reconstruir, ningún problema. Nunca contra producción.
 
 ---
 
-## 7. Pendientes
+## 7. Extensión de VS Code
+
+**No hay.** Es una herramienta de línea de comandos en Python; se ejecuta desde
+la terminal integrada y su salida ya es legible ahí.
+
+| | |
+|---|---|
+| Sitio | https://schemathesis.readthedocs.io |
+| Repositorio | https://github.com/schemathesis/schemathesis |
+| Instalación | `pip install schemathesis` |
+| Action | https://github.com/schemathesis/action |
+
+Sí conviene tener instalada la extensión de **Python**
+(`ms-python.python`) si vas a ejecutarlo en local, para que VS Code gestione el
+entorno virtual y no acabes instalándolo en el Python del sistema.
+
+---
+
+## 8. Pendientes
 
 | | Estado |
 |---|---|

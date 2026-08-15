@@ -173,7 +173,22 @@ silencia.
 
 ---
 
-## 9. Pendientes
+## 9. Extensión de VS Code
+
+**No hay, y no tiene sentido que la haya.** ZAP es una aplicación de escritorio
+con su propia interfaz, más un contenedor para el uso automatizado. El trabajo se
+hace en su GUI o en el pipeline, no en el editor.
+
+| | |
+|---|---|
+| Sitio | https://www.zaproxy.org |
+| Descarga | https://www.zaproxy.org/download/ |
+| Actions | https://github.com/zaproxy/action-api-scan · `action-baseline` · `action-full-scan` |
+| Documentación | https://www.zaproxy.org/docs/ |
+
+---
+
+## 10. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

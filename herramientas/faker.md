@@ -155,7 +155,30 @@ legal.
 
 ---
 
-## 7. Pendientes
+## 7. Extensión de VS Code
+
+**No hay, ni hace falta.** Es una librería npm: el autocompletado sale del
+tipado de TypeScript, que ya funciona en cuanto la instalas como devDependency.
+
+| | |
+|---|---|
+| Sitio | https://fakerjs.dev |
+| Referencia de la API | https://fakerjs.dev/api/ |
+| Repositorio | https://github.com/faker-js/faker |
+| Instalación | `npm i -D @faker-js/faker` |
+
+La referencia de la API es la página que vas a tener abierta mientras escribes el
+seed: lista todos los generadores por categoría con ejemplos de salida.
+
+> Cuidado con el paquete: el correcto es **`@faker-js/faker`**. El antiguo
+> `faker` (sin ámbito) quedó abandonado tras el incidente de 2022 en que su autor
+> saboteó sus propios paquetes, y sigue en npm. Es, de paso, un ejemplo de
+> manual de lo que documenta [docker-y-npm.md](./docker-y-npm.md) sobre riesgo de
+> cadena de suministro.
+
+---
+
+## 8. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

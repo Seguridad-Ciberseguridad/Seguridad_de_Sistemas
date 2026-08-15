@@ -118,7 +118,35 @@ real, y conviene decidirlo al principio y no después.
 
 ---
 
-## 7. Pendientes
+## 7. Extensión de VS Code
+
+pgcrypto es una extensión **de PostgreSQL**, no de VS Code — no tiene una propia.
+Lo que sí ayuda es un cliente de base de datos integrado para ejecutar el
+`CREATE EXTENSION` y comprobar el contenido de las columnas cifradas:
+
+| Extensión | ID | Nota |
+|---|---|---|
+| **PostgreSQL** (Microsoft) | `ms-ossdata.vscode-pgsql` | https://marketplace.visualstudio.com/items?itemName=ms-ossdata.vscode-pgsql |
+| **PostgreSQL** (Chris Kolkman) | `ckolkman.vscode-postgres` | Alternativa veterana, más ligera |
+
+| | |
+|---|---|
+| Documentación de pgcrypto | https://www.postgresql.org/docs/current/pgcrypto.html |
+
+> **Aviso que conecta con la sección 3.** Si te conectas a la base desde el
+> editor para probar `pgp_sym_decrypt`, la clave queda escrita en el historial de
+> consultas de la extensión y, del lado del servidor, en los logs de Postgres. Es
+> exactamente la fuga que describe la tabla de esa sección. Para pruebas usa una
+> clave desechable, nunca la de producción.
+>
+> Y mientras el puerto de Postgres siga abierto a internet, conectarse desde el
+> editor funciona precisamente por el motivo equivocado. Cuando esté cerrado
+> —que es lo primero de la lista— harán falta un túnel SSH y la extensión
+> `ms-vscode-remote.remote-ssh`.
+
+---
+
+## 8. Pendientes
 
 | | Estado | Prioridad |
 |---|---|---|

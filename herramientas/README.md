@@ -63,7 +63,50 @@ primero; ASVS te dice qué te falta.
 
 ---
 
-## 5. La observación de fondo
+## 5. Extensiones de VS Code
+
+De las quince herramientas documentadas, **seis tienen extensión** y **dos
+conectan** a un servicio externo.
+
+| Herramienta | Extensión | ID | Conecta |
+|---|---|---|---|
+| [SonarQube Cloud](./sonarqube-cloud.md) | SonarQube for IDE | `SonarSource.sonarlint-vscode` | **Sí** — `paredes-work`, User Token |
+| [Spectral](./spectral.md) | Spectral | `stoplight.spectral` | No |
+| [Prisma](./prisma.md) | Prisma | `Prisma.prisma` | No |
+| [ESLint](./eslint-y-vscode.md) | ESLint | `dbaeumer.vscode-eslint` | No |
+| [GitHub Actions](./github-actions.md) | GitHub Actions | `github.vscode-github-actions` | Sesión de GitHub |
+| [Docker](./docker-y-npm.md) | Container Tools | `ms-azuretools.vscode-docker` | No |
+| SCA — [Trivy](./docker-y-npm.md) | Aqua Trivy | `AquaSecurityOfficial.trivy-vulnerability-scanner` | No — *saltar Aqua Platform* |
+| SCA — [Snyk](./docker-y-npm.md) | Snyk Security | `snyk-security.snyk-vulnerability-scanner` | **Sí** — envía código a su nube |
+
+URL de cualquiera: `https://marketplace.visualstudio.com/items?itemName=<ID>`
+
+**Sin extensión** (y con motivo): [ZAP](./owasp-zap.md) y
+[Burp](./burp-suite.md) son aplicaciones de escritorio ·
+[Schemathesis](./schemathesis.md) es un CLI de Python ·
+[Gitleaks](./gitleaks.md) no tiene oficial, va por hook y CI ·
+[Faker](./faker.md) es una librería · [pgcrypto](./pgcrypto.md) es una extensión
+de Postgres · [EasyPanel](./easypanel.md) es un panel web ·
+[ASVS](./owasp-asvs.md) y [API Top 10](./owasp-api-top-10.md) son documentos.
+
+Cada ficha lleva su sección con los enlaces al sitio oficial y a la
+documentación. La lista operativa de qué instalar está en
+[eslint-y-vscode.md](./eslint-y-vscode.md) §7.
+
+> **Dos avisos que se repiten y conviene tener presentes:**
+>
+> **La raíz del workspace.** VS Code se abre en `Modulo_Policial`, no en las
+> subcarpetas. Trivy y Snyk abiertos sobre la carpeta de documentación no
+> encuentran nada porque no hay `package.json` que mirar — y un informe limpio
+> ahí no significa nada.
+>
+> **Snyk envía código a sus servidores.** Aceptable aquí, porque el código fuente
+> no contiene datos de ciudadanos, pero es una decisión que merece quedar
+> escrita. Trivy hace un trabajo parecido en local.
+
+---
+
+## 6. La observación de fondo
 
 El documento original está bien construido como bitácora de ingeniería, pero
 ordena las prioridades por **coste de implementación**, no por **riesgo**. En la
@@ -82,7 +125,7 @@ cosa. Ver [easypanel.md](./easypanel.md).
 
 ---
 
-## 6. Lo que sigue sin ficha
+## 7. Lo que sigue sin ficha
 
 Con [Gitleaks](./gitleaks.md) ya cubierto, quedan dos frentes de cadena de
 suministro sin documentar:
@@ -104,7 +147,7 @@ sí están aquí.
 
 ---
 
-## 7. Orden recomendado
+## 8. Orden recomendado
 
 ```
 Fase 0  Cerrar Postgres, rotar credenciales, auditar qué datos hay
@@ -125,7 +168,7 @@ encaja en ninguna fase porque no depende de ninguna.
 
 ---
 
-## 8. Nota sobre los enlaces del documento original
+## 9. Nota sobre los enlaces del documento original
 
 `ci-cd-y-herramientas.md` enlaza a `./README.md` ("Modelo de datos") y a
 `./historias-de-usuario.md` (backlog, donde vive HU-21). **Ninguno de los dos

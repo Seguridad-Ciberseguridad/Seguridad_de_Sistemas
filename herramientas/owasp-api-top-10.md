@@ -126,7 +126,22 @@ después a ASVS es el orden natural.
 
 ---
 
-## 7. Pendientes
+## 7. Dónde está
+
+Es un documento, no una herramienta: no hay extensión.
+
+| | |
+|---|---|
+| Página del proyecto | https://owasp.org/API-Security/ |
+| Edición vigente | https://owasp.org/API-Security/editions/2023/en/0x11-t10/ |
+| Repositorio | https://github.com/OWASP/API-Security |
+
+Hay traducción al castellano en el repositorio. Se lee entero en media hora, y es
+la media hora con mejor retorno de todo lo documentado en esta carpeta.
+
+---
+
+## 8. Pendientes
 
 | | Estado |
 |---|---|
