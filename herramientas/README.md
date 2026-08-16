@@ -51,7 +51,35 @@ opcional: el fallo nº1 de las APIs es indetectable de forma automática — ver
 
 ---
 
-## 4. Marcos de referencia
+## 4. Automatización alrededor del pipeline
+
+| | Para qué | Alcance |
+|---|---|---|
+| [n8n](./n8n.md) | Seis workflows aplicados a **este** proyecto | Específico |
+| [Automatizaciones de seguridad](./automatizaciones-de-seguridad.md) | Catálogo de nueve, **generalizado** | Cualquier sistema |
+| [IA en seguridad](./ia-en-seguridad.md) | Diez con modelos de lenguaje, **generalizado** | Cualquier sistema |
+
+n8n **no** reemplaza a GitHub Actions —su nodo Execute Command corre en el host,
+sin aislamiento y junto a las credenciales de todo lo demás— pero en la capa de
+agregación y alerta es mejor herramienta que Actions.
+
+Los tres se leen en orden. El primero es la capa de **notificar**; el segundo
+sube tres escalones —**verificar**, **correlacionar** y **responder** (SOAR)—; el
+tercero cruza un eje distinto.
+
+```
+escalones 1-4   cuánta AUTORIDAD tiene la automatización sobre el sistema
+IA              cuánta CAPACIDAD de análisis tiene
+```
+
+No son lo mismo, y confundirlos es el error caro: la IA sube el techo de lo que
+puedes **analizar**, no el de lo que debes **automatizar**. Lo que merece la pena
+es capacidad alta con autoridad nula — análisis que produce texto que alguien
+lee. Ver [ia-en-seguridad.md](./ia-en-seguridad.md) §1.
+
+---
+
+## 5. Marcos de referencia
 
 | | Responde a | Esfuerzo |
 |---|---|---|
@@ -63,10 +91,10 @@ primero; ASVS te dice qué te falta.
 
 ---
 
-## 5. Extensiones de VS Code
+## 6. Extensiones de VS Code
 
-De las quince herramientas documentadas, **seis tienen extensión** y **dos
-conectan** a un servicio externo.
+De las herramientas documentadas, **seis tienen extensión** y **dos conectan** a
+un servicio externo.
 
 | Herramienta | Extensión | ID | Conecta |
 |---|---|---|---|
@@ -106,7 +134,7 @@ documentación. La lista operativa de qué instalar está en
 
 ---
 
-## 6. La observación de fondo
+## 7. La observación de fondo
 
 El documento original está bien construido como bitácora de ingeniería, pero
 ordena las prioridades por **coste de implementación**, no por **riesgo**. En la
@@ -125,7 +153,7 @@ cosa. Ver [easypanel.md](./easypanel.md).
 
 ---
 
-## 7. Lo que sigue sin ficha
+## 8. Lo que sigue sin ficha
 
 Con [Gitleaks](./gitleaks.md) ya cubierto, quedan dos frentes de cadena de
 suministro sin documentar:
@@ -147,7 +175,7 @@ sí están aquí.
 
 ---
 
-## 8. Orden recomendado
+## 9. Orden recomendado
 
 ```
 Fase 0  Cerrar Postgres, rotar credenciales, auditar qué datos hay
@@ -168,7 +196,7 @@ encaja en ninguna fase porque no depende de ninguna.
 
 ---
 
-## 9. Nota sobre los enlaces del documento original
+## 10. Nota sobre los enlaces del documento original
 
 `ci-cd-y-herramientas.md` enlaza a `./README.md` ("Modelo de datos") y a
 `./historias-de-usuario.md` (backlog, donde vive HU-21). **Ninguno de los dos
