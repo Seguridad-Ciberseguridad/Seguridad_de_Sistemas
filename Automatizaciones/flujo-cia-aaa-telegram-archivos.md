@@ -227,8 +227,65 @@ Cuando construyas el entregable formal, puedes usar este flujo como el caso prá
 - [x] Preparar Log (consolida datos de ambas ramas)
 - [x] Log Integridad → Cifrar → Convertir → Guardar Drive → Actualizar Hash → Notificar Procesado → Audit Log Completo
 - [x] Rama false de "Se modifico?" conectada a Preparar Log (sin pasar por VirusTotal)
+- [x] Límite de tamaño de archivo + validación MIME type
+- [x] Timestamp de Telegram registrado en audit log
+- [x] Cuarentena cifrada para archivos con extensión peligrosa
+- [x] Rate limiting por usuario (hoja RateLimit en Google Sheets)
+- [x] Risk Score dinámico con decaimiento temporal
+- [x] Bloqueo automático de usuarios por Risk Score
+- [x] Columna `bloqueado boolean` en tabla `public.users` de Supabase
+- [x] `Evaluar Rol` actualizado — `isAuthorized = isAdmin && !bloqueado`
+- [x] Switch `Esta Autorizado?` con 3 salidas: autorizado / bloqueado / no admin
+- [x] Flujo de usuario bloqueado: Log de Bloqueado → Notificar que esta bloqueado
+- [x] Flujo de no autorizado: Log AMENAZA → Leer Eventos Criticos → Verificar Bloqueo2 → Se debe Bloquear? → Bloquear Usuario → Telegram al admin
+
+---
+
+## 12. Mejoras de seguridad implementadas (2026-08-22)
+
+### Qué se agregó y por qué
+
+| Mejora | Nodos involucrados | Concepto de seguridad |
+|---|---|---|
+| Límite de tamaño de archivo | Switch tamaño | Vulnerabilidad — previene ataques de denegación de servicio por archivos masivos |
+| Validación de MIME type | Verificar MIME + MIME Valido? | Vulnerabilidad — detecta archivos con extensión falsificada (ej. `.pdf` que en realidad es `.exe`) |
+| Timestamp de Telegram en audit log | Audit Log Completo | Accounting — permite detectar mensajes reenviados o con fecha manipulada |
+| Cuarentena cifrada | Cifrar + Guardar Cuarentena Drive | Confidencialidad — el archivo peligroso se aísla cifrado, no se elimina, para análisis forense posterior |
+| Rate limiting | Leer Intentos + Verificar Rate Limit + Rate Limit OK? | Amenaza — detecta y frena intentos masivos automatizados (fuerza bruta, bots) |
+| Risk Score con decaimiento temporal | Verificar Bloqueo / Verificar Bloqueo2 | Riesgo — cuantifica el nivel de amenaza de un usuario ponderando eventos recientes más que antiguos |
+| Bloqueo automático | Debe Bloquearse? / Se debe Bloquear? + Bloquear Usuario | Control de acceso — respuesta automática ante riesgo acumulado, sin intervención manual |
+| Separación de flujos por tipo de rechazo | Esta Autorizado? (3 salidas) | Autorización — distingue entre usuario bloqueado (amenaza conocida) y usuario sin rol (acceso indebido) |
+
+### Risk Score — cómo funciona
+
+Cada evento de seguridad tiene un peso. El score se calcula sumando los pesos de los eventos de las últimas 24 horas, con decaimiento temporal: eventos recientes pesan más que eventos antiguos.
+
+| Evento | Peso base |
+|---|---|
+| MALWARE | 10 |
+| AMENAZA | 5 |
+| INTEGRIDAD COMPROMETIDA | 4 |
+| MIME_FALSIFICADO | 3 |
+| RATE LIMIT | 2 |
+
+**Factor de decaimiento:** `1 - (horasTranscurridas / 24)`
+**Umbral de bloqueo:** 15 puntos
+
+Si el score acumulado supera 15, el sistema actualiza `bloqueado = true` en Supabase y notifica al admin automáticamente. Esto implementa el concepto de **riesgo residual dinámico** — el riesgo de un usuario no es fijo, se recalcula en cada interacción.
+
+### Conceptos trabajados en esta sesión
+
+| Concepto | Cómo se aplicó |
+|---|---|
+| Activo | La tabla `users` de Supabase es un activo crítico — contiene la lista de quién puede acceder al sistema |
+| Amenaza | Un usuario sin rol que intenta subir archivos repetidamente es una amenaza activa, no solo un error |
+| Vulnerabilidad | La ausencia de rate limiting era una vulnerabilidad explotable — un bot podía intentar acceso indefinidamente |
+| Impacto | Un archivo malicioso procesado sin controles puede comprometer Drive, Sheets y el bot completo |
+| Riesgo residual | Después de aplicar todos los controles, el riesgo que queda es que un admin legítimo sea comprometido — se mitiga con el audit log |
+| Control | Cada nodo del flujo es un control técnico: preventivo (MIME, tamaño), detectivo (hash, VirusTotal), correctivo (bloqueo automático) |
 
 ---
 
 *Documento creado el 2026-08-21 como práctica del Mes 1 — CIA + AAA + Riesgo aplicados.*
 *Actualizado el 2026-08-22 con el flujo real implementado en n8n.cloud.*
+*Actualizado el 2026-08-22 con mejoras de seguridad: rate limiting, Risk Score, bloqueo automático, separación de flujos por tipo de rechazo.*
