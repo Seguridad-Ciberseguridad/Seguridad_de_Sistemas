@@ -1,0 +1,1671 @@
+{
+  "name": "Recepcion Segura de Archivos por Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "34c9887b-ebef-477e-9271-8cd4972991fd",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -624,
+        192
+      ],
+      "webhookId": "05307ee9-b135-43e7-80bd-e597095d7c66",
+      "credentials": {
+        "telegramApi": {
+          "id": "QZY8r3qZjXCorKO7",
+          "name": "Testeando_Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const msg = $json.message || {};\nconst from = msg.from || {};\nconst chat = msg.chat || {};\nconst doc = msg.document || {};\n\n// Extensiones consideradas peligrosas\nconst dangerousExtensions = ['exe','bat','cmd','com','scr','js','vbs','msi','jar','ps1','sh','dll','apk','pif','reg'];\n\nconst fileName = doc.file_name || '';\nconst parts = fileName.split('.');\nconst extension = parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';\nconst userId = from.id;\n\nreturn {\n  json: {\n    userId: userId,\n    username: from.first_name || '',\n    chatId: chat.id,\n    fileId: doc.file_id || '',\n    fileName: fileName,\n    fileSize: doc.file_size || 0,\n    mimeType: doc.mime_type || '',\n    extension: extension,\n    hasFile: Boolean(doc.file_id),\n    isDangerous: dangerousExtensions.includes(extension),\n  },\n};"
+      },
+      "id": "27abfab0-0c45-4a0f-8889-36a5c2e212ff",
+      "name": "Normalizar y Clasificar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "users",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telegram_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.userId }}"
+            }
+          ]
+        }
+      },
+      "id": "0a7a66fa-060d-402b-bfad-67160658cff4",
+      "name": "Verificar Rol en Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        128
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "QyiexkIp3LY8C96M",
+          "name": "SQSI-CIA-AAA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const row = $json || {};\nconst n = $(\"Normalizar y Clasificar\").item.json;\nconst role = (row.rol || \"\").toString().toLowerCase();\nconst isAdmin = role === \"admin\";\nconst username = row.nombre;\nreturn {\n  json: {\n    userId: n.userId,\n    username: username,\n    chatId: n.chatId,\n    fileId: n.fileId,\n    fileName: n.fileName,\n    fileSize: n.fileSize,\n    mimeType: n.mimeType,\n    extension: n.extension,\n    hasFile: n.hasFile,\n    isDangerous: n.isDangerous,\n    role: role || \"(sin rol)\",\n    isAuthorized: isAdmin,\n  },\n};"
+      },
+      "id": "80ade7ed-2f5e-4da9-8e9a-b48c2e37ce58",
+      "name": "Evaluar Rol",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "auth",
+              "leftValue": "={{ $json.isAuthorized }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a116f049-7572-4b71-ab05-5a3b8cad6fc1",
+      "name": "Remitente Autorizado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.fileId }}",
+        "additionalFields": {}
+      },
+      "id": "01a2d7df-6e78-46d5-bedf-a0ad25f39313",
+      "name": "Descargar Archivo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -64
+      ],
+      "webhookId": "a7572de2-da3b-4d94-ae14-69b84e3c869c",
+      "credentials": {
+        "telegramApi": {
+          "id": "QZY8r3qZjXCorKO7",
+          "name": "Testeando_Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "danger",
+              "leftValue": "={{ $(\"Normalizar y Clasificar\").item.json.isDangerous }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e07b4feb-716c-493a-bb83-bbd5fcaf059a",
+      "name": "Extension Peligrosa?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "name": "=CUARENTENA_{{ $(\"Normalizar y Clasificar\").item.json.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "15UgJlz69djtsE_Nl2eJE3wI09unwjReh",
+          "mode": "list",
+          "cachedResultName": "Carpeta de Cuarentena",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/15UgJlz69djtsE_Nl2eJE3wI09unwjReh"
+        },
+        "options": {}
+      },
+      "id": "43b6e451-ad7e-4d91-bd49-fa49888ca4db",
+      "name": "Cuarentena Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1072,
+        -208
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "aOfYvIUuODyAVNpE",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU",
+          "mode": "list",
+          "cachedResultName": "sheet Seguridad",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Auditoria"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "user_id": "={{ $(\"Normalizar y Clasificar\").item.json.userId }}",
+            "username": "={{ $(\"Normalizar y Clasificar\").item.json.username }}",
+            "file_name": "={{ $(\"Normalizar y Clasificar\").item.json.fileName }}",
+            "event": "VULNERABILIDAD detectada",
+            "integrity_status": "",
+            "risk_level": "ALTO",
+            "detail": "=Extension peligrosa: .{{ $(\"Normalizar y Clasificar\").item.json.extension }} - archivo movido a cuarentena"
+          },
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "file_name",
+              "displayName": "file_name",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "integrity_status",
+              "displayName": "integrity_status",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "detail",
+              "displayName": "detail",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fa2bbe45-aa81-462e-a079-6c7cb4475afe",
+      "name": "Log VULNERABILIDAD",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1312,
+        -208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pEtdDgAy3TgvEXx7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $(\"Normalizar y Clasificar\").item.json.chatId }}",
+        "text": "=Archivo rechazado: la extension .{{ $(\"Normalizar y Clasificar\").item.json.extension }} es potencialmente peligrosa y fue puesta en cuarentena.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "5018a5c2-c7dd-48b6-92b8-15d1e1eabbac",
+      "name": "Notificar Rechazo (Vulnerabilidad)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        -208
+      ],
+      "webhookId": "1d8d37aa-6b64-4667-ad8f-a9e15831fc49",
+      "credentials": {
+        "telegramApi": {
+          "id": "QZY8r3qZjXCorKO7",
+          "name": "Testeando_Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "binaryData": true,
+        "dataPropertyName": "sha256"
+      },
+      "id": "b24c86ed-0b18-45c8-b30e-365512c77ff1",
+      "name": "Calcular SHA-256",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const nodoArchivo = $(\"Descargar Archivo\").item;\nconst bin = nodoArchivo.binary || {};\n\nconst e = $(\"Evaluar Rol\").item.json;\nconst n = $(\"Normalizar y Clasificar\").item.json;\n\nreturn {\n  json: {\n    userId: n.userId,\n    username: e.username,\n    chatId: n.chatId,\n    fileName: n.fileName,\n    extension: n.extension,\n    sha256: $json.sha256,\n    fileBase64: bin.data ? bin.data.data : \"\",\n  },\n  binary: bin,  // pasa el objeto binary completo al siguiente nodo\n};\n"
+      },
+      "id": "055b8737-ab6f-4dbd-993c-b6e741ddb2d9",
+      "name": "Preparar Archivo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU",
+          "mode": "list",
+          "cachedResultName": "sheet Seguridad",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Hashes"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "file_name",
+              "lookupValue": "={{ $json.fileName }}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "id": "bc9c2633-f9ba-4193-b708-42af757a4446",
+      "name": "Leer Hash Anterior",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1552,
+        128
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pEtdDgAy3TgvEXx7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const row = $json || {};\nconst prev = row.sha256 || \"\";\n\nconst p = $(\"Preparar Archivo\").item.json;\nconst bin = $(\"Preparar Archivo\").item.binary || {};\nconst current = p.sha256;\n\nlet integrityStatus;\nlet riskLevel;\n\nif (!prev) { integrityStatus = \"OK\"; riskLevel = \"NUEVO\"; }\nelse if (prev === current) { integrityStatus = \"OK\"; riskLevel = \"BAJO\"; }\nelse { integrityStatus = \"INTEGRIDAD COMPROMETIDA\"; riskLevel = \"ALTO\"; }\n\nreturn {\n  json: {\n    userId: p.userId,\n    username: p.username,\n    chatId: p.chatId,\n    fileName: p.fileName,\n    extension: p.extension,\n    sha256: current,\n    prevHash: prev,\n    fileBase64: p.fileBase64,\n    integrityStatus,\n    riskLevel,\n  },\n  binary: bin,  // ← rescata el binario de Preparar Archivo\n};\n"
+      },
+      "id": "b1352c2e-c6a1-4d1c-8e2c-186dabba96ad",
+      "name": "Comparar Integridad",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU",
+          "mode": "list",
+          "cachedResultName": "sheet Seguridad",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Auditoria"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "user_id": "={{ $json.userId }}",
+            "username": "={{ $json.username }}",
+            "file_name": "={{ $json.fileName }}",
+            "event": "={{ $json.verdict }}",
+            "integrity_status": "={{ $json.integrityStatus }}",
+            "risk_level": "={{ $json.riskLevel }}",
+            "detail": "=SHA256 actual={{ $json.sha256 }} | anterior={{ $json.prevHash }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "file_name",
+              "displayName": "file_name",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "integrity_status",
+              "displayName": "integrity_status",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "detail",
+              "displayName": "detail",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "69e6ea3d-9a54-491f-a70c-03fdbd01a0fe",
+      "name": "Log Integridad",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3872,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pEtdDgAy3TgvEXx7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "action": "encrypt",
+        "value": "={{ $(\"Comparar Integridad\").item.json.fileBase64 }}",
+        "dataPropertyName": "encrypted"
+      },
+      "id": "e8d46df2-5355-4025-bfb3-e945950ef0e9",
+      "name": "Cifrar Archivo (AES-256)",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        4112,
+        144
+      ],
+      "credentials": {
+        "crypto": {
+          "id": "u6CnBZ0kIovBT1LI",
+          "name": "Crypto account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "encrypted",
+        "options": {
+          "fileName": "={{ $(\"Comparar Integridad\").item.json.fileName }}.enc"
+        }
+      },
+      "id": "cf158ec7-2379-483d-a78d-b1f894bd3da0",
+      "name": "Convertir Cifrado a Archivo",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        4336,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $(\"Comparar Integridad\").item.json.fileName }}.enc",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "12-LFjDsBmdBQaGTit1VHx4C9UsXy9GDt",
+          "mode": "list",
+          "cachedResultName": "Carpeta de archivos Cifrados",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/12-LFjDsBmdBQaGTit1VHx4C9UsXy9GDt"
+        },
+        "options": {}
+      },
+      "id": "e387abe9-5aa1-464e-a5a4-9db7044f5d66",
+      "name": "Guardar Cifrado Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4528,
+        144
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "aOfYvIUuODyAVNpE",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU",
+          "mode": "list",
+          "cachedResultName": "sheet Seguridad",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Hashes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "file_name"
+          ],
+          "value": {
+            "file_name": "={{ $(\"Comparar Integridad\").item.json.fileName }}",
+            "sha256": "={{ $(\"Comparar Integridad\").item.json.sha256 }}",
+            "user_id": "={{ $(\"Comparar Integridad\").item.json.userId }}",
+            "updated_at": "={{ $now.toISO() }}"
+          },
+          "schema": [
+            {
+              "id": "file_name",
+              "displayName": "file_name",
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "sha256",
+              "displayName": "sha256",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1815379d-1196-49ed-839d-0eb6586d9c55",
+      "name": "Actualizar Hash",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4720,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pEtdDgAy3TgvEXx7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $(\"Comparar Integridad\").item.json.chatId }}",
+        "text": "=Archivo procesado correctamente.\nArchivo: {{ $(\"Comparar Integridad\").item.json.fileName }}\nIntegridad: {{ $(\"Comparar Integridad\").item.json.integrityStatus }}\nNivel de riesgo: {{ $(\"Comparar Integridad\").item.json.riskLevel }}\nEl archivo fue cifrado y almacenado de forma segura.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "4086b39f-22d8-4176-b3be-dc42040e8030",
+      "name": "Notificar Procesado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4960,
+        144
+      ],
+      "webhookId": "2914ea48-0788-4633-937f-3c239edd792d",
+      "credentials": {
+        "telegramApi": {
+          "id": "QZY8r3qZjXCorKO7",
+          "name": "Testeando_Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU",
+          "mode": "list",
+          "cachedResultName": "sheet Seguridad",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Auditoria"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "user_id": "={{ $(\"Comparar Integridad\").item.json.userId }}",
+            "username": "={{ $(\"Comparar Integridad\").item.json.username }}",
+            "file_name": "={{ $(\"Comparar Integridad\").item.json.fileName }}",
+            "event": "PROCESADO: archivo cifrado y almacenado",
+            "integrity_status": "={{ $(\"Comparar Integridad\").item.json.integrityStatus }}",
+            "risk_level": "={{ $(\"Comparar Integridad\").item.json.riskLevel }}",
+            "detail": "=SHA256={{ $(\"Comparar Integridad\").item.json.sha256 }} | almacenado como encrypted/{{ $(\"Comparar Integridad\").item.json.fileName }}.enc"
+          },
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "file_name",
+              "displayName": "file_name",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "integrity_status",
+              "displayName": "integrity_status",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "detail",
+              "displayName": "detail",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3549b90a-0ba3-4512-87d9-2cf9827f6bf1",
+      "name": "Audit Log Completo",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5152,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pEtdDgAy3TgvEXx7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU",
+          "mode": "list",
+          "cachedResultName": "sheet Seguridad",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LR_9fH3hRVjwtaBrGiGQ2SoRn5KzEcceNHHl54WYgcU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Auditoria"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "user_id": "={{ $json.userId }}",
+            "username": "={{ $json.username }}",
+            "file_name": "={{ $json.fileName }}",
+            "event": "AMENAZA: acceso no autorizado",
+            "integrity_status": "",
+            "risk_level": "ALTO",
+            "detail": "=Remitente no autorizado (rol: {{ $json.role }}). UserID={{ $json.userId }}"
+          },
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "file_name",
+              "displayName": "file_name",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "integrity_status",
+              "displayName": "integrity_status",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            },
+            {
+              "id": "detail",
+              "displayName": "detail",
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "display": true,
+              "required": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d4208c1f-3052-4ade-95a5-75cf33a53db2",
+      "name": "Log AMENAZA",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        288
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pEtdDgAy3TgvEXx7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $(\"Normalizar y Clasificar\").item.json.chatId }}",
+        "text": "Acceso denegado: no tienes rol de administrador para enviar archivos a este bot. El evento fue registrado.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "8d22da73-8649-458d-a6ef-923b49dd33a9",
+      "name": "Notificar Rechazo (Amenaza)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        288
+      ],
+      "webhookId": "a2eeeca9-0e7d-45bf-9461-fc241cd4450f",
+      "credentials": {
+        "telegramApi": {
+          "id": "QZY8r3qZjXCorKO7",
+          "name": "Testeando_Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b40fed58-8af8-4bc5-91d9-31b2cef31e30",
+              "leftValue": "={{ $json.fileSize }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -240,
+        192
+      ],
+      "id": "716fa6a4-76f7-4d50-9a7e-98b28627a1d8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "¡Hola! 👋 Para comenzar, por favor sube un archivo en este chat. Puedes hacerlo tocando el ícono del clip (📎) aquí abajo.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        352
+      ],
+      "id": "7498cb26-36d1-4467-bea8-3b8f565511b4",
+      "name": "Send a text message",
+      "webhookId": "b3c00789-e5b0-4cd7-befd-1d77c780c9bc",
+      "credentials": {
+        "telegramApi": {
+          "id": "QZY8r3qZjXCorKO7",
+          "name": "Testeando_Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.virustotal.com/api/v3/files",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2272,
+        -64
+      ],
+      "id": "26df66dd-a98a-46f4-992c-00eeeb7badd4",
+      "name": "Subir archivo a VirusTotal",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "uZWuq9l9pygOXCNS",
+          "name": "Api VirusTotal"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2496,
+        -64
+      ],
+      "id": "efb672fb-b081-4e25-9bf3-e70ed8a27bc8",
+      "name": "Wait",
+      "webhookId": "797390ab-b12c-4786-aff8-f7b2c5b277a3"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/analyses/{{ $json.data.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2704,
+        -64
+      ],
+      "id": "cd1bad53-90d3-47f4-b85b-226a3572da09",
+      "name": "Obtener Resultado del analisis",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "uZWuq9l9pygOXCNS",
+          "name": "Api VirusTotal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ac810502-384f-4fa9-ad65-1ee63b37b594",
+              "leftValue": "={{ $json.verdict }}",
+              "rightValue": "MALWARE",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3136,
+        -64
+      ],
+      "id": "542a2f61-7f62-419b-bace-2e0b21c1d79a",
+      "name": "Esta Limpio?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Comparar Integridad').item.json.chatId }}",
+        "text": "=🚨 ALERTA CRÍTICA\nArchivo: {{ $json.fileName }}\nUsuario: {{ $json.username }} ({{ $json.chatId }})\nVeredicto: {{ $json.verdict }}\nMotores maliciosos: {{ $json.maliciousEngines }}/{{ $json.totalEngines }}\nHash actual: {{ $json.sha256 }}\nHash anterior: {{ $json.prevHash }}\nAnálisis VT: https://www.virustotal.com/gui/file/{{ $json.sha256 }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3344,
+        -192
+      ],
+      "id": "58eff18d-5f6a-4496-a28b-196fbef3e306",
+      "name": "Avisar al equipo",
+      "webhookId": "78afb129-7604-4691-8865-0dbb3e8e8cd4",
+      "credentials": {
+        "telegramApi": {
+          "id": "QZY8r3qZjXCorKO7",
+          "name": "Testeando_Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const analysis = $json.data.attributes;\nconst stats = analysis.stats;\n\n// Cuántos motores detectaron algo malicioso\nconst malicious = stats.malicious || 0;\nconst suspicious = stats.suspicious || 0;\nconst total = stats.harmless + stats.malicious + stats.suspicious + stats.undetected;\n\n// Determinar nivel de riesgo\nlet riskLevel;\nlet verdict;\n\nif (malicious > 5) {\n  riskLevel = \"CRÍTICO\";\n  verdict = \"MALWARE CONFIRMADO\";\n} else if (malicious > 0 || suspicious > 3) {\n  riskLevel = \"ALTO\";\n  verdict = \"SOSPECHOSO\";\n} else {\n  riskLevel = \"MEDIO\";\n  verdict = \"LIMPIO - pero hash cambió\";\n}\n\nconst p = $(\"Comparar Integridad\").item.json;\n\nreturn {\n  json: {\n    userId: p.userId,\n    username: p.username,\n    chatId: p.chatId,\n    fileName: p.fileName,\n    sha256: p.sha256,\n    prevHash: p.prevHash,\n    integrityStatus: p.integrityStatus,\n    riskLevel: riskLevel,\n    verdict: verdict,\n    maliciousEngines: malicious,\n    suspiciousEngines: suspicious,\n    totalEngines: total,\n    vtAnalysisId: $json.data.id,\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        -64
+      ],
+      "id": "dee18381-0f58-4631-9dcc-c4177a8591c3",
+      "name": "Interpretar VirusTotal"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Comparar Integridad').item.json.chatId }}",
+        "text": "={{ $(\"Interpretar VirusTotal\").item.json.riskLevel === \"BAJO\" ? \"✅ Archivo limpio. Sin amenazas detectadas.\" : \"⚠️ Archivo sospechoso. Proceder con cautela.\" }}\n📄 Archivo: {{ $(\"Comparar Integridad\").item.json.fileName }}\n🔐 SHA-256: {{ $('Comparar Integridad').item.json.sha256 }}\n🧪 Veredicto: {{ $(\"Interpretar VirusTotal\").item.json.verdict }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3344,
+        32
+      ],
+      "id": "4523b197-cd32-4e7c-8e5a-2a7b1625c032",
+      "name": "Notificar Proceso de VirusTotal",
+      "webhookId": "5bbf521a-8bc4-43cd-9403-09a5d5cb9eae",
+      "credentials": {
+        "telegramApi": {
+          "id": "QZY8r3qZjXCorKO7",
+          "name": "Testeando_Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "66a64ace-aebf-49af-81c0-dbb09d04fa18",
+              "leftValue": "={{ $json.integrityStatus }}",
+              "rightValue": "INTEGRIDAD COMPROMETIDA",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2048,
+        128
+      ],
+      "id": "afb0f3ab-7336-4fc1-9efc-63ea65398e4b",
+      "name": "Se modifico?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ci = $(\"Comparar Integridad\").item.json;\n\n// VirusTotal solo existe si pasó por ahí\nlet verdict = \"N/A\";\nlet riskLevel = ci.riskLevel;\n\ntry {\n  const vt = $(\"Interpretar VirusTotal\").item.json;\n  if (vt && vt.verdict) {\n    verdict = vt.verdict;\n    riskLevel = vt.riskLevel;\n  }\n} catch(e) {}\n\nreturn {\n  json: {\n    userId: ci.userId,\n    username: ci.username,\n    chatId: ci.chatId,\n    fileName: ci.fileName,\n    sha256: ci.sha256,\n    prevHash: ci.prevHash,\n    integrityStatus: ci.integrityStatus,\n    riskLevel,\n    verdict,\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3648,
+        144
+      ],
+      "id": "faeabf8e-6c53-4008-af4a-dcf9dbee9b06",
+      "name": "Preparar Log"
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 739133065,
+          "message": {
+            "message_id": 56,
+            "from": {
+              "id": 6251076597,
+              "is_bot": false,
+              "first_name": "Jhoel",
+              "last_name": "Paredes Pava",
+              "language_code": "es"
+            },
+            "chat": {
+              "id": 6251076597,
+              "first_name": "Jhoel",
+              "last_name": "Paredes Pava",
+              "type": "private"
+            },
+            "date": 1787424438,
+            "document": {
+              "file_name": "PSICO BOT APP.json",
+              "mime_type": "application/json",
+              "file_id": "BQACAgEAAxkBAAM4aonutikimSPNKhYdS3GpORubj3MAAqMJAAIvLlFEtsan2iPzT5E9BA",
+              "file_unique_id": "AgADowkAAi8uUUQ",
+              "file_size": 44378
+            }
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalizar y Clasificar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar y Clasificar": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Rol en Supabase": {
+      "main": [
+        [
+          {
+            "node": "Evaluar Rol",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluar Rol": {
+      "main": [
+        [
+          {
+            "node": "Remitente Autorizado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remitente Autorizado?": {
+      "main": [
+        [
+          {
+            "node": "Descargar Archivo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log AMENAZA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Archivo": {
+      "main": [
+        [
+          {
+            "node": "Extension Peligrosa?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extension Peligrosa?": {
+      "main": [
+        [
+          {
+            "node": "Cuarentena Drive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calcular SHA-256",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cuarentena Drive": {
+      "main": [
+        [
+          {
+            "node": "Log VULNERABILIDAD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log VULNERABILIDAD": {
+      "main": [
+        [
+          {
+            "node": "Notificar Rechazo (Vulnerabilidad)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular SHA-256": {
+      "main": [
+        [
+          {
+            "node": "Preparar Archivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Archivo": {
+      "main": [
+        [
+          {
+            "node": "Leer Hash Anterior",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Hash Anterior": {
+      "main": [
+        [
+          {
+            "node": "Comparar Integridad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comparar Integridad": {
+      "main": [
+        [
+          {
+            "node": "Se modifico?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Integridad": {
+      "main": [
+        [
+          {
+            "node": "Cifrar Archivo (AES-256)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cifrar Archivo (AES-256)": {
+      "main": [
+        [
+          {
+            "node": "Convertir Cifrado a Archivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convertir Cifrado a Archivo": {
+      "main": [
+        [
+          {
+            "node": "Guardar Cifrado Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Cifrado Drive": {
+      "main": [
+        [
+          {
+            "node": "Actualizar Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Hash": {
+      "main": [
+        [
+          {
+            "node": "Notificar Procesado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar Procesado": {
+      "main": [
+        [
+          {
+            "node": "Audit Log Completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log AMENAZA": {
+      "main": [
+        [
+          {
+            "node": "Notificar Rechazo (Amenaza)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Verificar Rol en Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subir archivo a VirusTotal": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Obtener Resultado del analisis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Resultado del analisis": {
+      "main": [
+        [
+          {
+            "node": "Interpretar VirusTotal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Esta Limpio?": {
+      "main": [
+        [
+          {
+            "node": "Avisar al equipo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificar Proceso de VirusTotal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interpretar VirusTotal": {
+      "main": [
+        [
+          {
+            "node": "Esta Limpio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar Proceso de VirusTotal": {
+      "main": [
+        [
+          {
+            "node": "Preparar Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se modifico?": {
+      "main": [
+        [
+          {
+            "node": "Subir archivo a VirusTotal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Log": {
+      "main": [
+        [
+          {
+            "node": "Log Integridad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "734aebdd-5b75-4b69-b3d1-0d7f11a342ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b523129153ecafa695722c946b73756d46bdc6c49456e147d52ca4fc0d861df5"
+  },
+  "nodeGroups": [
+    {
+      "id": "f65b9846-d3f9-4d9d-82b2-7a94d62cebec",
+      "name": "Autenticacion",
+      "nodeIds": [
+        "0a7a66fa-060d-402b-bfad-67160658cff4",
+        "80ade7ed-2f5e-4da9-8e9a-b48c2e37ce58"
+      ],
+      "description": "Verifica en Supabase que el remitente tenga rol admin."
+    },
+    {
+      "id": "9c8929fa-a312-4ee8-a01a-b32b3b01ae93",
+      "name": "Controles de Seguridad",
+      "nodeIds": [
+        "b24c86ed-0b18-45c8-b30e-365512c77ff1",
+        "055b8737-ab6f-4dbd-993c-b6e741ddb2d9",
+        "bc9c2633-f9ba-4193-b708-42af757a4446",
+        "b1352c2e-c6a1-4d1c-8e2c-186dabba96ad"
+      ],
+      "description": "Calcula SHA-256 y verifica la integridad contra el hash anterior."
+    },
+    {
+      "id": "8d51f534-8595-450c-80b1-89f51721b4cb",
+      "name": "Cifrado y Almacenamiento",
+      "nodeIds": [
+        "e8d46df2-5355-4025-bfb3-e945950ef0e9",
+        "cf158ec7-2379-483d-a78d-b1f894bd3da0",
+        "e387abe9-5aa1-464e-a5a4-9db7044f5d66",
+        "1815379d-1196-49ed-839d-0eb6586d9c55",
+        "4086b39f-22d8-4176-b3be-dc42040e8030",
+        "3549b90a-0ba3-4512-87d9-2cf9827f6bf1"
+      ],
+      "description": "Cifra el archivo con AES-256, lo guarda en Drive, actualiza el hash y notifica."
+    },
+    {
+      "id": "f29a3d89-3489-4139-87d6-4caec5592ef2",
+      "name": "Analisis de Malware con VirusTotal",
+      "nodeIds": [
+        "26df66dd-a98a-46f4-992c-00eeeb7badd4",
+        "efb672fb-b081-4e25-9bf3-e70ed8a27bc8",
+        "cd1bad53-90d3-47f4-b85b-226a3572da09",
+        "dee18381-0f58-4631-9dcc-c4177a8591c3"
+      ]
+    }
+  ],
+  "id": "1GG717IFcrk9vOEX",
+  "tags": []
+}
