@@ -1,7 +1,9 @@
 # SonarQube Cloud — SAST
 
-> Categoría: análisis estático de código (SAST) · **Veredicto: viable y prioritaria**
-> Índice: [README.md](./README.md) · Origen: [ci-cd-y-herramientas.md](../ci-cd-y-herramientas.md) §4
+> Categoría: análisis estático de código (SAST) · **Veredicto: viable y prioritaria**  
+> Índice: [README.md](../README.md)  
+> Guías técnicas: [funcionamiento-sast-y-ejemplos.md](./funcionamiento-sast-y-ejemplos.md) · [quality-gate-y-clean-as-you-code.md](./quality-gate-y-clean-as-you-code.md)  
+> Origen: [ci-cd-y-herramientas.md](../../ci-cd-y-herramientas.md) §4
 
 ---
 
